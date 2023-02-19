@@ -1,16 +1,16 @@
+import { Layout } from '@/components/Layout';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const Event = () => {
   const router = useRouter();
   return (
-    <>
-      <h1>Event Slug</h1>
-      {router.query.slug}
-      <div>
-        <Link href="/">Go back to home</Link>
-      </div>
-    </>
+    <Layout
+      title="DJ Events | Find the hottest parties"
+      description="Find the latest DJ and other musical events"
+    >
+      <h1>Event</h1>
+    </Layout>
   );
 };
 

@@ -1,8 +1,13 @@
+import { Layout } from '@/components/Layout';
+
 const AddEvent = () => {
   return (  
-    <div>
+    <Layout
+      title="Add New Event"
+      description="Add new DJ and other musical events"
+    >
       <h1>Add Event</h1>
-    </div>
+    </Layout>
   );
 }
  
