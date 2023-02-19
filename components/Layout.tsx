@@ -1,5 +1,7 @@
 import Head from 'next/head';
 import styles from '../styles/Layout.module.css';
+import { Footer } from './Footer';
+import { Header } from './Header';
 
 interface LayoutProps {
   title: string | false;
@@ -26,8 +28,9 @@ export const Layout = ({
         />
         {keywords && <meta name="keywords" content={keywords} />}
       </Head>
-
+      <Header />
       <div className={styles.container}>{children}</div>
+      <Footer />
     </div>
   );
 };
