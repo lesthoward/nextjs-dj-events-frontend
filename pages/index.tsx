@@ -1,26 +1,48 @@
+import { EventItem } from '@/components/EventItem';
 import { Layout } from '@/components/Layout';
+import { API_URL } from '@/config/index';
+import { GetStaticProps, InferGetServerSidePropsType } from 'next';
 import Link from 'next/link';
+import { IEventResponse } from 'types/interface';
 
-const Home = () => {
+const Home = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
+  const { events } = props;
   return (
     <Layout
-      title="DJ Events | Find the hottest parties"
-      description="Find the latest DJ and other musical events"
+      title="DJ Events | All Events"
+      description="List of all dj and musical events near you"
     >
-      <h1>Home</h1>
-      <ul>
-        <li>
-          <Link href="/about">About</Link>
-        </li>
-        <li>
-          <Link href="/events">All Events</Link>
-        </li>
-        <li>
-          <Link href="/events/1">Event 1</Link>
-        </li>
-      </ul>
+      <h1>Upcoming events</h1>
+      {events.events.length === 0 && <h3>No events to show</h3>}
+      {events.events.map((event) => (
+        <EventItem {...event} />
+      ))}
+      {events.events.length > 0 && (
+        <Link href="/events" className="btn-secondary">
+         View All Events
+        </Link>
+      )}
     </Layout>
   );
+};
+
+export const getStaticProps: GetStaticProps<{
+  events: IEventResponse;
+}> = async () => {
+  const res = await fetch(`${API_URL}/api/events`);
+  const events: IEventResponse = await res.json();
+
+  if (!events) {
+    return {
+      notFound: true,
+    };
+  }
+  return {
+    props: {
+      events,
+    },
+    revalidate: 1,
+  };
 };
 
 export default Home;
