@@ -9,8 +9,18 @@ import * as Icons from 'react-icons/fa';
 import Image from 'next/image';
 
 const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
-  const { id, name, date, time, image, performers, description, address, venue } =
-    props;
+  const { attributes } = props;
+  const {
+    id,
+    name,
+    date,
+    time,
+    image,
+    performers,
+    description,
+    address,
+    venue,
+  } = attributes;
 
   const deleteEventHandler = () => {};
   return (
@@ -30,12 +40,17 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
       </div>
 
       <span>
-        {date} at {time}
+        {new Date(date).toLocaleDateString('En-en')} at {time}
       </span>
       <h1>{name}</h1>
       {image && (
         <div className={styles.image}>
-          <Image src={image} width={960} height={600} alt={name} />
+          <Image
+            src={image.data.attributes.formats.medium.url}
+            width={960}
+            height={600}
+            alt={name}
+          />
         </div>
       )}
 
@@ -46,7 +61,7 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
       <h3>Venue: {venue}</h3>
       <p>{address}</p>
 
-      <Link href='/events' className={styles.back}>
+      <Link href="/events" className={styles.back}>
         {'< '}
         Go To Events List
       </Link>
@@ -57,8 +72,8 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
 export const getStaticPaths: GetStaticPaths = async () => {
   const res = await fetch(`${API_URL}/api/events`);
   const events: IEventResponse = await res.json();
-  const paths = events.events.map((event) => ({
-    params: { slug: event.slug },
+  const paths = events.data.map(({ attributes: { slug } }) => ({
+    params: { slug },
   }));
 
   return {
@@ -74,15 +89,17 @@ export const getStaticProps: GetStaticProps<IEvent> = async (context) => {
       notFound: true,
     };
   }
-  const res = await fetch(`${API_URL}/api/events/${params.slug}`);
-  const events: IEvent[] = await res.json();
-  if (!events.length) {
+  const url = `${API_URL}/api/events?filters[slug][$eq]=${params.slug}&populate=image`;
+  const res = await fetch(url);
+  const events: IEventResponse = await res.json();
+
+  if (!events.data.length) {
     return {
       notFound: true,
     };
   }
   return {
-    props: events[0],
+    props: events.data[0],
   };
 };
 

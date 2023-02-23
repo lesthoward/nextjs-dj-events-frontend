@@ -12,8 +12,8 @@ const Home = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
       description="Find the latest DJ and other musical events"
     >
       <h1>Upcoming events</h1>
-      {events.events.length === 0 && <h3>No events to show</h3>}
-      {events.events.map((event) => (
+      {events.data.length === 0 && <h3>No events to show</h3>}
+      {events.data.map((event) => (
         <EventItem {...event} />
       ))}
     </Layout>
@@ -23,9 +23,8 @@ const Home = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
 export const getStaticProps: GetStaticProps<{
   events: IEventResponse;
 }> = async () => {
-  const res = await fetch(`${API_URL}/api/events`);
+  const res = await fetch(`${API_URL}/api/events?populate=*`);
   const events: IEventResponse = await res.json();
-  events.events.length = 3;
 
   if (!events) {
     return {
