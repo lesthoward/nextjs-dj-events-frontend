@@ -7,17 +7,31 @@ import { useRouter } from 'next/router';
 import { ToastContainer, toast } from 'react-toastify';
 import { API_URL } from '@/config/index';
 import { IUniqueEventResponse } from 'types/interface';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import moment from 'moment';
+import Image from 'next/image';
+import * as Icons from 'react-icons/fa';
 
-const AddEvent = () => {
+const EditEvent = (
+  props: InferGetServerSidePropsType<typeof getServerSideProps>
+) => {
+  const { event } = props;
   const [values, setValues] = useState({
-    name: '',
-    performers: '',
-    venue: '',
-    address: '',
-    date: '',
-    time: '',
-    description: '',
+    name: event ? event.data?.attributes.name : '',
+    performers: event ? event.data?.attributes.performers : '',
+    venue: event ? event.data?.attributes.venue : '',
+    address: event ? event.data?.attributes.address : '',
+    date: event ? event.data?.attributes.date : '',
+    time: event ? event.data?.attributes.time : '',
+    description: event ? event.data?.attributes.description : '',
   });
+
+
+  const [imagePreview] = useState(
+    event && event.data?.attributes.image
+      ? event.data?.attributes.image.data?.attributes.formats.medium.url
+      : null
+  );
   const router = useRouter();
 
   const submitFormHandler = async (e: React.FormEvent) => {
@@ -29,8 +43,8 @@ const AddEvent = () => {
       return toast.error('Please fill all the fields');
     }
 
-    const res = await fetch(`${API_URL}/api/events`, {
-      method: 'POST',
+    const res = await fetch(`${API_URL}/api/events/${event?.data?.id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         // Authorization: `Bearer ${token}`,
@@ -68,7 +82,7 @@ const AddEvent = () => {
       description="Add new DJ and other musical events"
     >
       <Link href="/events">Go back</Link>
-      <h1>Add Event</h1>
+      <h1>Edit Event</h1>
 
       <ToastContainer />
 
@@ -120,7 +134,11 @@ const AddEvent = () => {
               type="date"
               name="date"
               id="date"
-              value={values.date}
+              value={
+                event
+                  ? moment(event.data?.attributes.date).format('yyyy-MM-DD')
+                  : values.date
+              }
               onChange={inputChangeHandler}
             />
           </div>
@@ -146,10 +164,40 @@ const AddEvent = () => {
           ></textarea>
         </div>
 
-        <input type="submit" value="Add Event" className="btn" />
+        <input type="submit" value="Update Event" className="btn" />
       </form>
+
+      <h2>Event Image</h2>
+      {imagePreview ? (
+        <Image src={imagePreview} alt="Event Image" height={100} width={170} />
+      ) : (
+        <div>
+          <p>No image uploaded</p>
+        </div>
+      )}
+
+      <div>
+        <button className="btn-secondary">
+          <Icons.FaImage />
+          <span> Set Image</span>
+        </button>
+      </div>
     </Layout>
   );
 };
 
-export default AddEvent;
+export const getServerSideProps: GetServerSideProps<{
+  event?: IUniqueEventResponse;
+}> = async (props) => {
+  const { params } = props;
+  const { id } = params as any;
+  const res = await fetch(`${API_URL}/api/events/${id}?populate=image`);
+  const eventData: IUniqueEventResponse = await res.json();
+  return {
+    props: {
+      event: eventData,
+    },
+  };
+};
+
+export default EditEvent;

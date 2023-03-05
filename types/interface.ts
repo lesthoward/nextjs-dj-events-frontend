@@ -1,4 +1,4 @@
-export interface IEventPOSTResponse {
+export interface IUniqueEventResponse {
   data?: IEvent;
 }
 
@@ -9,7 +9,6 @@ export interface IEventResponse {
 export interface IEvent {
   id: number;
   attributes: {
-    id: string;
     name: string;
     slug: string;
     venue: string;

@@ -3,15 +3,16 @@ import { API_URL } from '@/config/index';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { IEvent, IEventResponse } from 'types/interface';
 import { InferGetServerSidePropsType } from 'next';
+import { ToastContainer, toast } from 'react-toastify';
 import styles from '@/styles/Event.module.css';
 import Link from 'next/link';
 import * as Icons from 'react-icons/fa';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 
 const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
-  const { attributes } = props;
+  const { id, attributes } = props;
   const {
-    id,
     name,
     date,
     time,
@@ -21,8 +22,24 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
     address,
     venue,
   } = attributes;
+  const router = useRouter();
 
-  const deleteEventHandler = () => {};
+  const deleteEventHandler = async () => {
+    const confirmAction = confirm('Are you sure?');
+    if (confirmAction) {
+      const url = `${API_URL}/api/events/${id}`;
+      const res = await fetch(url, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message);
+      } else {
+        router.push('/events');
+      }
+    }
+  };
   return (
     <Layout
       title="DJ Events | Find the hottest parties"
@@ -33,11 +50,13 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
           <Link href={`/events/edit/${id}`}>
             <Icons.FaPencilAlt /> Edit Event
           </Link>
-          <Link href="#" className={styles.delete}>
+          <Link href="#" className={styles.delete} onClick={deleteEventHandler}>
             <Icons.FaTimes /> Delete Event
           </Link>
         </div>
       </div>
+
+      <ToastContainer />
 
       <span>
         {new Date(date).toLocaleDateString('En-en')} at {time}
