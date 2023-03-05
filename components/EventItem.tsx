@@ -8,14 +8,18 @@ export const EventItem = (props: IEvent) => {
   const { image, name, date, time, slug } = attributes;
   return (
     <div className={styles.event}>
-      <div className={styles.img}>
-        <Image
-          src={image ? image.data.attributes.url : '/images/event-default.png'}
-          width={170}
-          height={100}
-          alt={name}
-        />
-      </div>
+      {image && image.data && (
+        <div className={styles.img}>
+          <Image
+            src={
+              image ? image.data.attributes.url : '/images/event-default.png'
+            }
+            width={170}
+            height={100}
+            alt={name}
+          />
+        </div>
+      )}
 
       <div className={styles.info}>
         <span>

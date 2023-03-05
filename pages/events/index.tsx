@@ -11,10 +11,10 @@ const Home = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
       title="DJ Events | Find the hottest parties"
       description="Find the latest DJ and other musical events"
     >
-      <h1>Upcoming events</h1>
-      {events.data.length === 0 && <h3>No events to show</h3>}
-      {events.data.map((event) => (
-        <EventItem {...event} />
+      <h1>Events</h1>
+      {events.data?.length === 0 && <h3>No events to show</h3>}
+      {events.data?.map((event) => (
+        <EventItem key={event.id} {...event} />
       ))}
     </Layout>
   );

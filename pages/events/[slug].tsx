@@ -43,7 +43,7 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
         {new Date(date).toLocaleDateString('En-en')} at {time}
       </span>
       <h1>{name}</h1>
-      {image && (
+      {image && image.data ? (
         <div className={styles.image}>
           <Image
             src={image.data.attributes.formats.medium.url}
@@ -52,6 +52,8 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
             alt={name}
           />
         </div>
+      ) : (
+        <h1>No Image</h1>
       )}
 
       <h3>Performers: </h3>
@@ -72,6 +74,14 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
 export const getStaticPaths: GetStaticPaths = async () => {
   const res = await fetch(`${API_URL}/api/events`);
   const events: IEventResponse = await res.json();
+
+  if (!events.data?.length) {
+    return {
+      paths: [],
+      fallback: true,
+    };
+  }
+
   const paths = events.data.map(({ attributes: { slug } }) => ({
     params: { slug },
   }));
@@ -93,7 +103,7 @@ export const getStaticProps: GetStaticProps<IEvent> = async (context) => {
   const res = await fetch(url);
   const events: IEventResponse = await res.json();
 
-  if (!events.data.length) {
+  if (!events.data?.length) {
     return {
       notFound: true,
     };

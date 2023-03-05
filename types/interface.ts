@@ -1,9 +1,13 @@
+export interface IEventPOSTResponse {
+  data?: IEvent;
+}
+
 export interface IEventResponse {
-  data: IEvent[];
+  data?: IEvent[];
 }
 
 export interface IEvent {
-  id:number;
+  id: number;
   attributes: {
     id: string;
     name: string;
@@ -15,12 +19,14 @@ export interface IEvent {
     time: string;
     description: string;
     image?: ICloudinaryImage;
+    createdAt: string;
+    updatedAt: string;
   };
+  meta?: any;
 }
 
-
 interface ICloudinaryImage {
-  data: ICloudinaryImageData;
+  data?: ICloudinaryImageData;
 }
 
 interface ICloudinaryImageData {
