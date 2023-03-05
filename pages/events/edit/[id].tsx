@@ -11,6 +11,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import moment from 'moment';
 import Image from 'next/image';
 import * as Icons from 'react-icons/fa';
+import { Modal } from '@/components/Modal';
 
 const EditEvent = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
@@ -25,7 +26,7 @@ const EditEvent = (
     time: event ? event.data?.attributes.time : '',
     description: event ? event.data?.attributes.description : '',
   });
-
+  const [showModal, setShowModal] = useState(false);
 
   const [imagePreview] = useState(
     event && event.data?.attributes.image
@@ -74,6 +75,10 @@ const EditEvent = (
   ) => {
     const { name, value } = e.target;
     setValues({ ...values, [name]: value });
+  };
+
+  const showModalHandler = (state: boolean) => {
+    setShowModal(state);
   };
 
   return (
@@ -177,11 +182,27 @@ const EditEvent = (
       )}
 
       <div>
-        <button className="btn-secondary">
+        <button
+          className="btn-secondary"
+          onClick={() => showModalHandler(true)}
+        >
           <Icons.FaImage />
           <span> Set Image</span>
         </button>
       </div>
+
+      <Modal
+        enabled={showModal}
+        onClose={() => showModalHandler(false)}
+        title="Image Upload"
+      >
+        <p>
+          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Impedit
+          laudantium illum ab explicabo voluptatibus dolorem ullam excepturi
+          nostrum, commodi, illo libero. Quam amet, consequuntur consectetur
+          saepe laborum nemo molestias sequi!
+        </p>
+      </Modal>
     </Layout>
   );
 };
