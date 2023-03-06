@@ -9,24 +9,18 @@ import Link from 'next/link';
 import * as Icons from 'react-icons/fa';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { getCloudinaryImage } from 'utils/images.utils';
 
 const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
   const { id, attributes } = props;
-  const {
-    name,
-    date,
-    time,
-    image,
-    performers,
-    description,
-    address,
-    venue,
-  } = attributes;
+  const { name, date, time, image, performers, description, address, venue } =
+    attributes;
   const router = useRouter();
 
   const deleteEventHandler = async () => {
     const confirmAction = confirm('Are you sure?');
     if (confirmAction) {
+      console.log(props);
       const url = `${API_URL}/api/events/${id}`;
       const res = await fetch(url, {
         method: 'DELETE',
@@ -65,7 +59,9 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
       {image && image.data ? (
         <div className={styles.image}>
           <Image
-            src={image.data.attributes.formats.medium.url}
+            src={getCloudinaryImage({
+              data: props,
+            })}
             width={960}
             height={600}
             alt={name}

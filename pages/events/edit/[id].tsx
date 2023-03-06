@@ -1,7 +1,7 @@
 import 'react-toastify/dist/ReactToastify.css';
 import styles from '@/styles/Form.module.css';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { useRouter } from 'next/router';
 import { ToastContainer, toast } from 'react-toastify';
@@ -12,6 +12,8 @@ import moment from 'moment';
 import Image from 'next/image';
 import * as Icons from 'react-icons/fa';
 import { Modal } from '@/components/Modal';
+import { ImageUpload } from '@/components/ImageUpload';
+import { getCloudinaryImage } from 'utils/images.utils';
 
 const EditEvent = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
@@ -26,13 +28,12 @@ const EditEvent = (
     time: event ? event.data?.attributes.time : '',
     description: event ? event.data?.attributes.description : '',
   });
+
+  
+
   const [showModal, setShowModal] = useState(false);
 
-  const [imagePreview] = useState(
-    event && event.data?.attributes.image
-      ? event.data?.attributes.image.data?.attributes.formats.medium.url
-      : null
-  );
+  const [imagePreview, setImagePreview] = useState(getCloudinaryImage(event));
   const router = useRouter();
 
   const submitFormHandler = async (e: React.FormEvent) => {
@@ -80,6 +81,23 @@ const EditEvent = (
   const showModalHandler = (state: boolean) => {
     setShowModal(state);
   };
+
+  const uploadImageHandler = async () => {
+    if (event && event.data) {
+      const res = await fetch(
+        `${API_URL}/api/events/${event.data.id}?populate=image`
+      );
+      const eventResponse: IUniqueEventResponse = await res.json();
+      if (eventResponse.data && eventResponse.data.attributes.image) {
+        setImagePreview(getCloudinaryImage(eventResponse));
+        setShowModal(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    console.log('imagePreview', imagePreview);
+  }, [imagePreview]);
 
   return (
     <Layout
@@ -191,18 +209,18 @@ const EditEvent = (
         </button>
       </div>
 
-      <Modal
-        enabled={showModal}
-        onClose={() => showModalHandler(false)}
-        title="Image Upload"
-      >
-        <p>
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Impedit
-          laudantium illum ab explicabo voluptatibus dolorem ullam excepturi
-          nostrum, commodi, illo libero. Quam amet, consequuntur consectetur
-          saepe laborum nemo molestias sequi!
-        </p>
-      </Modal>
+      {event && event.data && (
+        <Modal
+          enabled={showModal}
+          onClose={() => showModalHandler(false)}
+          title="Upload Event Image"
+        >
+          <ImageUpload
+            eventId={event.data.id}
+            uploadImageHandler={uploadImageHandler}
+          />
+        </Modal>
+      )}
     </Layout>
   );
 };

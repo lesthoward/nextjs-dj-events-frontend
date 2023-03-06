@@ -39,7 +39,7 @@ interface ICloudinaryAttributes {
   caption?: any;
   width: number;
   height: number;
-  formats: ICloudinaryFormats;
+  formats?: ICloudinaryFormats;
   hash: string;
   ext: string;
   mime: string;
@@ -53,10 +53,10 @@ interface ICloudinaryAttributes {
 }
 
 interface ICloudinaryFormats {
-  thumbnail: ICloudinaryThumbnail;
-  small: ICloudinaryThumbnail;
-  large: ICloudinaryThumbnail;
-  medium: ICloudinaryThumbnail;
+  thumbnail?: ICloudinaryThumbnail;
+  small?: ICloudinaryThumbnail;
+  large?: ICloudinaryThumbnail;
+  medium?: ICloudinaryThumbnail;
 }
 
 interface ICloudinaryThumbnail {

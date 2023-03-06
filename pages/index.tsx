@@ -15,11 +15,11 @@ const Home = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
       <h1>Upcoming events</h1>
       {events?.data?.length === 0 && <h3>No events to show</h3>}
       {events?.data?.map((event) => (
-        <EventItem key={event.attributes.id} {...event} />
+        <EventItem key={event.id} {...event} />
       ))}
       {events?.data?.length && (
         <Link href="/events" className="btn-secondary">
-         View All Events
+          View All Events
         </Link>
       )}
     </Layout>
@@ -29,7 +29,9 @@ const Home = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
 export const getStaticProps: GetStaticProps<{
   events?: IEventResponse;
 }> = async () => {
-  const res = await fetch(`${API_URL}/api/events?populate=*&sort=date%3Adesc&pagination[pageSize]=3`);
+  const res = await fetch(
+    `${API_URL}/api/events?populate=*&sort=date%3Adesc&pagination[pageSize]=3`
+  );
   const events: IEventResponse = await res.json();
 
   if (!events) {

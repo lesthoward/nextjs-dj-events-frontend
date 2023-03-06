@@ -41,7 +41,7 @@ export const Modal = (props: ModalProps) => {
             <Icons.FaTimes />
           </Link>
         </div>
-        {title && <h2>{title}</h2>}
+        {title && <h1>{title}</h1>}
 
         <div className={styles.body}>{children}</div>
       </div>
