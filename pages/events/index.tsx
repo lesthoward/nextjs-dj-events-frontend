@@ -1,11 +1,21 @@
 import { EventItem } from '@/components/EventItem';
 import { Layout } from '@/components/Layout';
 import { API_URL } from '@/config/index';
-import { GetStaticProps, InferGetServerSidePropsType } from 'next';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { IEventResponse } from 'types/interface';
+import qs from 'qs';
+import Link from 'next/link';
 
-const Home = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
+const PerPage = 3;
+
+const Home = (
+  props: InferGetServerSidePropsType<typeof getServerSideProps>
+) => {
   const { events } = props;
+  const { meta } = events;
+  const lastPage = meta?.pagination?.total
+    ? Math.ceil(meta.pagination.total / PerPage)
+    : 1;
   return (
     <Layout
       title="DJ Events | Find the hottest parties"
@@ -16,15 +26,45 @@ const Home = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
       {events.data?.map((event) => (
         <EventItem key={event.id} {...event} />
       ))}
+
+      {meta?.pagination?.page && meta?.pagination?.page > 1 && (
+        <Link href={`/events?page=${meta.pagination.page - 1}`}>
+          <span className="btn-secondary">Prev</span>
+        </Link>
+      )}
+      {meta?.pagination?.page && meta?.pagination?.page < lastPage && (
+        <Link href={`/events?page=${meta.pagination.page + 1}`}>
+          <span className="btn-secondary">Next</span>
+        </Link>
+      )}
+      <span>
+        {meta?.pagination?.page} of {lastPage}
+      </span>
     </Layout>
   );
 };
 
-export const getStaticProps: GetStaticProps<{
+export const getServerSideProps: GetServerSideProps<{
   events: IEventResponse;
-}> = async () => {
-  const res = await fetch(`${API_URL}/api/events?populate=*`);
-  const events: IEventResponse = await res.json();
+}> = async (props) => {
+  const { query } = props;
+  const pageNumber = query.page ? Number(query.page) : 1;
+  const queryStr = qs.stringify({
+    pagination: {
+      page: pageNumber,
+      pageSize: PerPage,
+    },
+    populate: ['image'],
+    sort: ['date:asc'],
+  });
+
+  // Fetch events
+  const eventRes = await fetch(`${API_URL}/api/events?${queryStr}`);
+  const events: IEventResponse = await eventRes.json();
+
+  // Fetch total number of events
+  const totalRes = await fetch(`${API_URL}/api/events/count`);
+  const total: number = await totalRes.json();
 
   if (!events) {
     return {
@@ -35,7 +75,6 @@ export const getStaticProps: GetStaticProps<{
     props: {
       events,
     },
-    revalidate: 1,
   };
 };
 

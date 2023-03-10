@@ -4,6 +4,16 @@ export interface IUniqueEventResponse {
 
 export interface IEventResponse {
   data?: IEvent[];
+  meta?: IMeta;
+}
+
+export interface IMeta {
+  pagination: {
+    total?: number;
+    page?: number;
+    pageSize?: number;
+    pageCount?: number;
+  };
 }
 
 export interface IEvent {
@@ -21,7 +31,6 @@ export interface IEvent {
     createdAt: string;
     updatedAt: string;
   };
-  meta?: any;
 }
 
 interface ICloudinaryImage {

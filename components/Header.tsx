@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import styles from '@/styles/Header.module.css';
 import { Search } from './Search';
+import * as Icons from 'react-icons/fa'
 
 export const Header = () => {
   return (
@@ -18,6 +19,12 @@ export const Header = () => {
           </li>
           <li>
             <Link href="/events/add">Add Event</Link>
+          </li>
+          <li>
+            <Link href="/account/login" className='btn-secondary btn-icon'>
+              <Icons.FaSignInAlt /> 
+              <span> Login</span>
+            </Link>
           </li>
         </ul>
       </nav>
