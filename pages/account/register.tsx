@@ -1,15 +1,17 @@
 import * as Icons from 'react-icons/fa';
 import styles from '@/styles/AuthForm.module.css';
-import { useState, ChangeEvent, FormEvent } from 'react';
+import Link from 'next/link';
+import { useState, ChangeEvent, FormEvent, useContext } from 'react';
 import { Layout } from '@/components/Layout';
 import { ToastContainer, toast } from 'react-toastify';
-import Link from 'next/link';
+import { AuthContext } from '@/context/AuthContext';
 
 const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const { register, error } = useContext(AuthContext);
 
   const onUsernameHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -31,6 +33,11 @@ const Register = () => {
     if (password !== passwordConfirm) {
       return toast.error('Passwords do not match!');
     }
+    register({
+      username,
+      email,
+      password,
+    });
   };
 
   return (
@@ -39,7 +46,7 @@ const Register = () => {
       <div className={styles.auth}>
         <h1>
           <Icons.FaUser />
-          <span> Login</span>
+          <span> Register</span>
         </h1>
         <form onSubmit={submitFormHandler}>
           <div>

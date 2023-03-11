@@ -1,13 +1,15 @@
 import * as Icons from 'react-icons/fa';
 import styles from '@/styles/AuthForm.module.css';
-import { useEffect, useState, ChangeEvent, FormEvent } from 'react';
+import { useState, ChangeEvent, FormEvent, useContext } from 'react';
 import { Layout } from '@/components/Layout';
 import { ToastContainer, toast } from 'react-toastify';
 import Link from 'next/link';
+import { AuthContext } from '@/context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login, error } = useContext(AuthContext);
 
   const onEmailHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -19,10 +21,10 @@ const Login = () => {
 
   const submitFormHandler = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log({
+    login({
       email,
       password,
-    });
+    })
   };
 
   return (
