@@ -1,42 +1,72 @@
 import { createContext, useState } from 'react';
 import { useRouter } from 'next/router';
-import { API_URL } from '../config';
+import { NEXT_URL } from '../config';
 
 export const AuthContext = createContext<{
   user: any;
-  error: boolean;
-  register: (props: registerProps) => void;
-  login: (props: loginProps) => void;
+  error: string;
+  register: (props: RegisterProps) => void;
+  login: (props: LoginProps) => void;
   logout: () => void;
   checkUserLoggedIn: (props: any) => void;
+  handleError: (state: string) => void;
 }>({} as any);
 
 interface AuthProps {
   children: React.ReactNode;
 }
 
-interface registerProps {
+interface RegisterProps {
   username: string;
   email: string;
   password: string;
 }
-interface loginProps {
+interface LoginProps {
   email: string;
   password: string;
 }
 
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  provider: string;
+  confirmed: boolean;
+  blocked: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const AuthProvider = ({ children }: AuthProps) => {
-  const [user, setUser] = useState(null);
-  const [error, setError] = useState<boolean>(false);
+  const [user, setUser] = useState<User>();
+  const [error, setError] = useState<string>('');
   const router = useRouter();
 
   // Register user
-  const register = async (props: registerProps) => {
+  const register = async (props: RegisterProps) => {
     console.log('register', props);
   };
   // Login user
-  const login = async (props: loginProps) => {
-    console.log('login', props);
+  const login = async (props: LoginProps) => {
+    const res = await fetch(`${NEXT_URL}/api/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        identifier: props.email.trim(),
+        password: props.password.trim(),
+      }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      setUser(data.user);
+    } else {
+      const errorMessage = data.message as string;
+      const capitalizedMessage = errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1);
+      setError(capitalizedMessage);
+    }
   };
   // Logout user
   const logout = async () => {
@@ -47,9 +77,21 @@ export const AuthProvider = ({ children }: AuthProps) => {
     console.log('checkUserLoggedIn', props);
   };
 
+  const handleError = (state: string) => {
+    setError(state);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, error, register, login, logout, checkUserLoggedIn }}
+      value={{
+        user,
+        error,
+        register,
+        login,
+        logout,
+        checkUserLoggedIn,
+        handleError,
+      }}
     >
       {children}
     </AuthContext.Provider>

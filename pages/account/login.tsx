@@ -1,15 +1,23 @@
+import 'react-toastify/dist/ReactToastify.css';
 import * as Icons from 'react-icons/fa';
 import styles from '@/styles/AuthForm.module.css';
-import { useState, ChangeEvent, FormEvent, useContext } from 'react';
+import Link from 'next/link';
+import { useState, ChangeEvent, FormEvent, useContext, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { ToastContainer, toast } from 'react-toastify';
-import Link from 'next/link';
 import { AuthContext } from '@/context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, error } = useContext(AuthContext);
+  const { login, error, handleError } = useContext(AuthContext);
+
+  useEffect(() => {
+    if(error) {
+      toast.error(error);
+      handleError('');
+    }
+  }, [error])
 
   const onEmailHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -24,7 +32,7 @@ const Login = () => {
     login({
       email,
       password,
-    })
+    })                                                                      
   };
 
   return (
