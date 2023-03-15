@@ -4,16 +4,17 @@ import { API_URL } from '@/config/index';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
-    const { identifier, password } = req.body;
+    const { username, email, password } = req.body;
     let strapiData = {} as any;
     try {
-      const strapiRes = await fetch(`${API_URL}/api/auth/local`, {
+      const strapiRes = await fetch(`${API_URL}/api/auth/local/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          identifier,
+          username,
+          email,
           password,
         }),
       });

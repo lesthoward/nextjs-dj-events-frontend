@@ -1,6 +1,8 @@
 import 'react-toastify/dist/ReactToastify.css';
 import styles from '@/styles/Form.module.css';
 import Link from 'next/link';
+import moment from 'moment';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { useRouter } from 'next/router';
@@ -8,8 +10,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import { API_URL } from '@/config/index';
 import { IUniqueEventResponse } from 'types/interface';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import moment from 'moment';
-import Image from 'next/image';
 import * as Icons from 'react-icons/fa';
 import { Modal } from '@/components/Modal';
 import { ImageUpload } from '@/components/ImageUpload';
@@ -20,16 +20,14 @@ const EditEvent = (
 ) => {
   const { event } = props;
   const [values, setValues] = useState({
-    name: event ? event.data?.attributes.name : '',
-    performers: event ? event.data?.attributes.performers : '',
-    venue: event ? event.data?.attributes.venue : '',
-    address: event ? event.data?.attributes.address : '',
-    date: event ? event.data?.attributes.date : '',
-    time: event ? event.data?.attributes.time : '',
-    description: event ? event.data?.attributes.description : '',
+    name: event?.data?.attributes.name || '',
+    performers: event?.data?.attributes.performers || '',
+    venue: event?.data?.attributes.venue || '',
+    address: event?.data?.attributes.address || '',
+    date: event?.data?.attributes.date || '',
+    time: event?.data?.attributes.time || '',
+    description: event?.data?.attributes.description || '',
   });
-
-  
 
   const [showModal, setShowModal] = useState(false);
 
@@ -95,10 +93,6 @@ const EditEvent = (
     }
   };
 
-  useEffect(() => {
-    console.log('imagePreview', imagePreview);
-  }, [imagePreview]);
-
   return (
     <Layout
       title="Add New Event"
@@ -158,8 +152,8 @@ const EditEvent = (
               name="date"
               id="date"
               value={
-                event
-                  ? moment(event.data?.attributes.date).format('yyyy-MM-DD')
+                event?.data?.attributes.date
+                  ? moment(event.data?.attributes.date).format('YYYY-MM-DD')
                   : values.date
               }
               onChange={inputChangeHandler}
@@ -228,6 +222,7 @@ const EditEvent = (
 export const getServerSideProps: GetServerSideProps<{
   event?: IUniqueEventResponse;
 }> = async (props) => {
+  const cookie = props.req.headers.cookie;
   const { params } = props;
   const { id } = params as any;
   const res = await fetch(`${API_URL}/api/events/${id}?populate=image`);

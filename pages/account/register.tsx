@@ -1,7 +1,7 @@
 import * as Icons from 'react-icons/fa';
 import styles from '@/styles/AuthForm.module.css';
 import Link from 'next/link';
-import { useState, ChangeEvent, FormEvent, useContext } from 'react';
+import { useState, ChangeEvent, FormEvent, useContext, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { ToastContainer, toast } from 'react-toastify';
 import { AuthContext } from '@/context/AuthContext';
@@ -11,7 +11,14 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const { register, error } = useContext(AuthContext);
+  const { register, error, handleError } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      handleError('');
+    }
+  }, [error]);
 
   const onUsernameHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
