@@ -18,14 +18,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
       const user = await strapiRes.json();
-      console.log('🚀 ~ file: user.ts:22 ~ user:', user)
       if (strapiRes.ok) {
         res.status(200).json({ user });
       } else {
         res.status(403).json({ message: 'User forbidden' });
       }
     } catch (error) {
-      console.log('🚀 ~ file: user.ts:28 ~ error:', error)
       res.status(403).json({ message: 'User forbidden' });
     }
   } else {

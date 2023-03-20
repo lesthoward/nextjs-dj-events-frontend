@@ -7,8 +7,12 @@ import { useRouter } from 'next/router';
 import { ToastContainer, toast } from 'react-toastify';
 import { API_URL } from '@/config/index';
 import { IUniqueEventResponse } from 'types/interface';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { parseCookies } from '@/helpers/index';
 
-const AddEvent = () => {
+const AddEvent = ({
+  token,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [values, setValues] = useState({
     name: '',
     performers: '',
@@ -29,14 +33,21 @@ const AddEvent = () => {
       return toast.error('Please fill all the fields');
     }
 
+    console.log('🚀 ~ file: add.tsx:42 ~ submitFormHandler ~ token:', token);
     const res = await fetch(`${API_URL}/api/events`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        data: values,
+        data: {
+          ...values,
+          user: {
+            disconnect: [],
+            connect: [{ id: 1, position: { end: true } }],
+          },
+        },
       }),
     });
 
@@ -150,6 +161,17 @@ const AddEvent = () => {
       </form>
     </Layout>
   );
+};
+
+export const getServerSideProps: GetServerSideProps<{
+  token: string | undefined;
+}> = async ({ req }) => {
+  const { token } = parseCookies(req);
+  return {
+    props: {
+      token,
+    },
+  };
 };
 
 export default AddEvent;

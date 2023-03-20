@@ -85,3 +85,19 @@ interface ICloudinaryProviderMetadata {
   public_id: string;
   resource_type: string;
 }
+
+export interface IEventMe {
+  id: number;
+  name: string;
+  slug: string;
+  venue: string;
+  address: string;
+  performers: string;
+  date: string;
+  time: string;
+  description: string;
+  image?: ICloudinaryImage;
+  createdAt: string;
+  updatedAt: string;
+  user?: any
+}

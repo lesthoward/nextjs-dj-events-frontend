@@ -4,8 +4,8 @@ export const getCloudinaryImage = (getEvent?: IUniqueEventResponse) => {
   const localEvent = getEvent;
   let imageUrl = '';
   if (localEvent) {
-    const imageAttr = localEvent.data?.attributes.image;
-    const formats = imageAttr?.data?.attributes.formats;
+    const imageAttr = localEvent.data?.attributes?.image;
+    const formats = imageAttr?.data?.attributes?.formats;
     if (imageAttr) {
       if (formats?.medium) {
         imageUrl = formats.medium.url;

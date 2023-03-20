@@ -1,18 +1,24 @@
+import 'react-toastify/dist/ReactToastify.css';
+import styles from '@/styles/Event.module.css';
+import Link from 'next/link';
+import Image from 'next/image';
+import * as Icons from 'react-icons/fa';
 import { Layout } from '@/components/Layout';
 import { API_URL } from '@/config/index';
-import { GetStaticPaths, GetStaticProps } from 'next';
+import qs from 'qs';
+import { GetServerSideProps, GetStaticPaths, GetStaticProps } from 'next';
 import { IEvent, IEventResponse } from 'types/interface';
 import { InferGetServerSidePropsType } from 'next';
 import { ToastContainer, toast } from 'react-toastify';
-import styles from '@/styles/Event.module.css';
-import Link from 'next/link';
-import * as Icons from 'react-icons/fa';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { getCloudinaryImage } from 'utils/images.utils';
+import { parse } from 'cookie';
 
-const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
-  const { id, attributes } = props;
+const Event = (
+  props: InferGetServerSidePropsType<typeof getServerSideProps>
+) => {
+  const { event } = props;
+  const { id, attributes } = event;
   const { name, date, time, image, performers, description, address, venue } =
     attributes;
   const router = useRouter();
@@ -20,15 +26,18 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
   const deleteEventHandler = async () => {
     const confirmAction = confirm('Are you sure?');
     if (confirmAction) {
-      console.log(props);
+      const { token } = parse(document.cookie);
       const url = `${API_URL}/api/events/${id}`;
       const res = await fetch(url, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.message);
+        toast.error(data.error.message || 'Something went wrong');
       } else {
         router.push('/events');
       }
@@ -60,7 +69,7 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
         <div className={styles.image}>
           <Image
             src={getCloudinaryImage({
-              data: props,
+              data: props.event,
             })}
             width={960}
             height={600}
@@ -86,59 +95,79 @@ const Event = (props: InferGetServerSidePropsType<typeof getStaticProps>) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await fetch(`${API_URL}/api/events`);
-  const events: IEventResponse = await res.json();
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const res = await fetch(`${API_URL}/api/events`);
+//   const events: IEventResponse = await res.json();
 
-  if (!events.data?.length) {
-    return {
-      paths: [],
-      fallback: true,
-    };
-  }
+//   if (!events.data?.length) {
+//     return {
+//       paths: [],
+//       fallback: true,
+//     };
+//   }
 
-  const paths = events.data.map(({ attributes: { slug } }) => ({
-    params: { slug },
-  }));
+//   const paths = events.data.map(({ attributes: { slug } }) => ({
+//     params: { slug },
+//   }));
 
-  return {
-    paths,
-    fallback: true,
-  };
-};
-
-export const getStaticProps: GetStaticProps<IEvent> = async (context) => {
-  const { params } = context;
-  if (!params) {
-    return {
-      notFound: true,
-    };
-  }
-  const url = `${API_URL}/api/events?filters[slug][$eq]=${params.slug}&populate=image`;
-  const res = await fetch(url);
-  const events: IEventResponse = await res.json();
-
-  if (!events.data?.length) {
-    return {
-      notFound: true,
-    };
-  }
-  return {
-    props: events.data[0],
-  };
-};
-
-// export const getServerSideProps: GetServerSideProps<IEvent> = async (
-//   context
-// ) => {
-//   const {
-//     query: { slug },
-//   } = context;
-//   const res = await fetch(`${API_URL}/api/events/${slug}`);
-//   const events: IEvent[] = await res.json();
 //   return {
-//     props: events[0] || {},
+//     paths,
+//     fallback: true,
 //   };
 // };
+
+// export const getStaticProps: GetStaticProps<IEvent> = async (context) => {
+//   const { params } = context;
+//   if (!params) {
+//     return {
+//       notFound: true,
+//     };
+//   }
+//   const url = `${API_URL}/api/events?filters[slug][$eq]=${params.slug}&populate=image`;
+//   const res = await fetch(url);
+//   const events: IEventResponse = await res.json();
+
+//   if (!events.data?.length) {
+//     return {
+//       notFound: true,
+//     };
+//   }
+//   return {
+//     props: events.data[0],
+//   };
+// };
+
+export const getServerSideProps: GetServerSideProps<{
+  event: IEvent;
+}> = async (context) => {
+  const {
+    query: { slug },
+  } = context;
+  const eventQuery = qs.stringify({
+    filters: {
+      slug: {
+        $eq: slug,
+      },
+    },
+  });
+  const apiEndpoint = `${API_URL}/api/events?${eventQuery}&populate=*`
+  const res = await fetch(apiEndpoint);
+  console.log('🚀 ~ file: [slug].tsx:156 ~ apiEndpoint:', apiEndpoint)
+  const events = await res.json();
+  if (!events || !events.data?.length) {
+    return {
+      props: {
+        event: {
+          attributes: {}
+        },
+      },
+    };
+  }
+  return {
+    props: {
+      event: events.data[0],
+    },
+  };
+};
 
 export default Event;

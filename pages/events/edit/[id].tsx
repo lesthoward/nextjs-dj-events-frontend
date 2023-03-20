@@ -14,11 +14,12 @@ import * as Icons from 'react-icons/fa';
 import { Modal } from '@/components/Modal';
 import { ImageUpload } from '@/components/ImageUpload';
 import { getCloudinaryImage } from 'utils/images.utils';
+import { parseCookies } from '@/helpers/index';
 
 const EditEvent = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
-  const { event } = props;
+  const { event, token } = props;
   const [values, setValues] = useState({
     name: event?.data?.attributes.name || '',
     performers: event?.data?.attributes.performers || '',
@@ -47,7 +48,7 @@ const EditEvent = (
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        // Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         data: values,
@@ -221,15 +222,17 @@ const EditEvent = (
 
 export const getServerSideProps: GetServerSideProps<{
   event?: IUniqueEventResponse;
+  token: string | undefined;
 }> = async (props) => {
-  const cookie = props.req.headers.cookie;
-  const { params } = props;
+  const { params, req } = props;
+  const { token } = parseCookies(req);
   const { id } = params as any;
   const res = await fetch(`${API_URL}/api/events/${id}?populate=image`);
   const eventData: IUniqueEventResponse = await res.json();
   return {
     props: {
       event: eventData,
+      token,
     },
   };
 };

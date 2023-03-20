@@ -6,7 +6,7 @@ export const Footer = () => {
     <footer className={styles.footer}>
       <p>&copy; DJ Events {new Date().getFullYear()}. </p>
       <Link target="_blank" href="https://www.linkedin.com/in/lesthoward/">
-        Click to get details about the developer
+        My Profile
       </Link>
     </footer>
   );
